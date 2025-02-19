@@ -1,0 +1,103 @@
+
+import React, { useState } from 'react';
+import ConversationsList from './ConversationsList';
+import MessageSection from './MessageSection';
+import { PlusCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export interface Message {
+  id: string;
+  content: string;
+  type: 'user' | 'assistant';
+  timestamp: Date;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  messages: Message[];
+  lastMessage: string;
+  timestamp: Date;
+}
+
+const ChatContainer = () => {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversation, setActiveConversation] = useState<string | null>(null);
+
+  const createNewConversation = () => {
+    const newConversation: Conversation = {
+      id: Math.random().toString(36).substring(7),
+      title: `Conversation ${conversations.length + 1}`,
+      messages: [],
+      lastMessage: "Nouvelle conversation",
+      timestamp: new Date(),
+    };
+    setConversations([newConversation, ...conversations]);
+    setActiveConversation(newConversation.id);
+  };
+
+  const deleteConversation = (id: string) => {
+    setConversations(conversations.filter(conv => conv.id !== id));
+    if (activeConversation === id) {
+      setActiveConversation(null);
+    }
+  };
+
+  const addMessage = (conversationId: string, content: string, type: 'user' | 'assistant') => {
+    setConversations(conversations.map(conv => {
+      if (conv.id === conversationId) {
+        const newMessage: Message = {
+          id: Math.random().toString(36).substring(7),
+          content,
+          type,
+          timestamp: new Date(),
+        };
+        return {
+          ...conv,
+          messages: [...conv.messages, newMessage],
+          lastMessage: content,
+          timestamp: new Date(),
+        };
+      }
+      return conv;
+    }));
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex h-screen bg-gray-50 p-4"
+    >
+      <div className="flex w-full max-w-7xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <ConversationsList
+          conversations={conversations}
+          activeConversation={activeConversation}
+          onSelect={setActiveConversation}
+          onDelete={deleteConversation}
+          onCreate={createNewConversation}
+        />
+        {activeConversation ? (
+          <MessageSection
+            conversation={conversations.find(c => c.id === activeConversation)!}
+            onSendMessage={(content) => addMessage(activeConversation, content, 'user')}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center bg-gray-50">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={createNewConversation}
+              className="flex flex-col items-center text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <PlusCircle className="w-16 h-16 mb-4" />
+              <span className="text-lg font-medium">Démarrer une nouvelle conversation</span>
+            </motion.button>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+export default ChatContainer;
