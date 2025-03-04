@@ -41,27 +41,27 @@ const ConversationsList = ({
   };
 
   return (
-    <div className="w-80 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 transition-colors duration-200">
-      <div className="p-4">
+    <div className="w-full h-full flex flex-col border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 transition-colors duration-200">
+      <div className="p-3 md:p-4 flex-shrink-0">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onCreate}
-          className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg py-3 px-4 hover:bg-primary/90 transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg py-2 md:py-3 px-3 md:px-4 hover:bg-primary/90 transition-colors text-sm md:text-base"
         >
-          <MessageSquarePlus className="w-5 h-5" />
+          <MessageSquarePlus className="w-4 h-4 md:w-5 md:h-5" />
           <span>Nouvelle conversation</span>
         </motion.button>
       </div>
       
-      <div className="overflow-y-auto h-[calc(100vh-8rem)]">
+      <div className="overflow-y-auto flex-1">
         <AnimatePresence>
           {conversations.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="p-4 text-center text-gray-500 dark:text-gray-400"
+              className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm"
             >
               Aucune conversation. Créez-en une nouvelle!
             </motion.div>
@@ -73,7 +73,7 @@ const ConversationsList = ({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className={`p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer group ${
+              className={`p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer group ${
                 activeConversation === conversation.id 
                 ? 'bg-white dark:bg-gray-700' 
                 : 'hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -116,7 +116,7 @@ const ConversationsList = ({
                       </motion.button>
                     </div>
                   ) : (
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate flex items-center gap-2">
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate flex items-center gap-2 text-sm md:text-base">
                       {conversation.title}
                       <motion.button
                         whileHover={{ scale: 1.1 }}
@@ -127,11 +127,11 @@ const ConversationsList = ({
                         }}
                         className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-opacity"
                       >
-                        <Edit2 className="w-3.5 h-3.5" />
+                        <Edit2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
                       </motion.button>
                     </h3>
                   )}
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-1">
+                  <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate mt-1">
                     {conversation.lastMessage}
                   </p>
                 </div>
@@ -144,7 +144,7 @@ const ConversationsList = ({
                   }}
                   className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-opacity"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </motion.button>
               </div>
               <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
