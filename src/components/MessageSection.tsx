@@ -1,19 +1,23 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Download } from 'lucide-react';
-import type { Conversation } from './ChatContainer';
+import { Send, Download, Paperclip, X, File } from 'lucide-react';
+import type { Conversation, FileAttachment } from './ChatContainer';
+import { useToast } from '@/hooks/use-toast';
 
 interface MessageSectionProps {
   conversation: Conversation;
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, attachment?: FileAttachment) => void;
 }
 
 const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) => {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [fileAttachment, setFileAttachment] = useState<FileAttachment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -25,9 +29,10 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
-      onSendMessage(message.trim());
+    if (message.trim() || fileAttachment) {
+      onSendMessage(message.trim(), fileAttachment || undefined);
       setMessage('');
+      setFileAttachment(null);
       setIsTyping(true);
       // Reset textarea height
       if (textareaRef.current) {
@@ -55,10 +60,54 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
     e.target.style.height = `${e.target.scrollHeight}px`;
   };
 
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "Fichier trop volumineux",
+          description: "Le fichier ne doit pas dépasser 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const fileUrl = URL.createObjectURL(file);
+      const newFileAttachment: FileAttachment = {
+        id: Math.random().toString(36).substring(7),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: fileUrl
+      };
+      
+      setFileAttachment(newFileAttachment);
+      toast({
+        title: "Fichier prêt à envoyer",
+        description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)`,
+      });
+    }
+  };
+
+  const removeAttachment = () => {
+    if (fileAttachment) {
+      URL.revokeObjectURL(fileAttachment.url);
+      setFileAttachment(null);
+    }
+  };
+
   const exportConversation = () => {
-    const messagesText = conversation.messages.map(msg => 
-      `${msg.type === 'user' ? 'Vous' : 'Assistant'} (${new Date(msg.timestamp).toLocaleString()}): ${msg.content}`
-    ).join('\n\n');
+    const messagesText = conversation.messages.map(msg => {
+      let text = `${msg.type === 'user' ? 'Vous' : 'Assistant'} (${new Date(msg.timestamp).toLocaleString()}): ${msg.content}`;
+      if (msg.attachment) {
+        text += `\n[Fichier joint: ${msg.attachment.name} - ${(msg.attachment.size / 1024).toFixed(1)} KB]`;
+      }
+      return text;
+    }).join('\n\n');
     
     const element = document.createElement('a');
     const file = new Blob([messagesText], {type: 'text/plain'});
@@ -67,6 +116,12 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' bytes';
+    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    else return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   return (
@@ -101,7 +156,29 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
                     : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                 } shadow-sm`}
               >
-                <p className="whitespace-pre-wrap">{msg.content}</p>
+                {msg.content && <p className="whitespace-pre-wrap">{msg.content}</p>}
+                
+                {msg.attachment && (
+                  <div className="mt-2 p-2 bg-black/10 dark:bg-white/10 rounded-md flex items-center gap-2">
+                    <File className="w-4 h-4" />
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate text-sm font-medium">{msg.attachment.name}</p>
+                      <p className="text-xs opacity-70">{formatFileSize(msg.attachment.size)}</p>
+                    </div>
+                    {msg.attachment.url && (
+                      <a 
+                        href={msg.attachment.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs underline text-primary-foreground/70 hover:text-primary-foreground"
+                        download={msg.attachment.name}
+                      >
+                        Télécharger
+                      </a>
+                    )}
+                  </div>
+                )}
+                
                 <div className={`text-xs mt-1 ${
                   msg.type === 'user' ? 'text-primary-foreground/70' : 'text-gray-400 dark:text-gray-500'
                 }`}>
@@ -144,6 +221,29 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
       </div>
 
       <form onSubmit={handleSubmit} className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        {fileAttachment && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2 truncate">
+              <File className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              <span className="text-sm truncate">{fileAttachment.name}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                ({formatFileSize(fileAttachment.size)})
+              </span>
+            </div>
+            <button 
+              type="button"
+              onClick={removeAttachment}
+              className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+            >
+              <X className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+            </button>
+          </motion.div>
+        )}
+
         <div className="flex items-end gap-2">
           <textarea
             ref={textareaRef}
@@ -154,11 +254,31 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
             className="flex-1 resize-none rounded-lg border border-gray-300 dark:border-gray-600 p-3 focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[2.5rem] max-h-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-200"
             rows={1}
           />
+          
+          <input 
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+            accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx"
+          />
+          
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={handleFileClick}
+            className="p-3 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+            title="Joindre un fichier"
+          >
+            <Paperclip className="w-5 h-5" />
+          </motion.button>
+          
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="submit"
-            disabled={!message.trim()}
+            disabled={!message.trim() && !fileAttachment}
             className="p-3 rounded-lg bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <Send className="w-5 h-5" />

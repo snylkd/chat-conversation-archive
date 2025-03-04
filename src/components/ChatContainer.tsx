@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import ConversationsList from './ConversationsList';
 import MessageSection from './MessageSection';
@@ -6,11 +5,20 @@ import { PlusCircle, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 
+export interface FileAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+}
+
 export interface Message {
   id: string;
   content: string;
   type: 'user' | 'assistant';
   timestamp: Date;
+  attachment?: FileAttachment;
 }
 
 export interface Conversation {
@@ -105,7 +113,7 @@ const ChatContainer = () => {
     });
   };
 
-  const addMessage = (conversationId: string, content: string, type: 'user' | 'assistant') => {
+  const addMessage = (conversationId: string, content: string, type: 'user' | 'assistant', attachment?: FileAttachment) => {
     setConversations(conversations.map(conv => {
       if (conv.id === conversationId) {
         const newMessage: Message = {
@@ -113,14 +121,19 @@ const ChatContainer = () => {
           content,
           type,
           timestamp: new Date(),
+          attachment
         };
         
         // Simulate AI response
         if (type === 'user') {
           setTimeout(() => {
+            const responseContent = attachment 
+              ? `J'ai bien reçu votre fichier: "${attachment.name}"`
+              : `Réponse automatique à: "${content}"`;
+            
             addMessage(
               conversationId, 
-              `Réponse automatique à: "${content}"`, 
+              responseContent, 
               'assistant'
             );
           }, 1000);
@@ -129,7 +142,7 @@ const ChatContainer = () => {
         return {
           ...conv,
           messages: [...conv.messages, newMessage],
-          lastMessage: content,
+          lastMessage: content || (attachment ? `Fichier: ${attachment.name}` : ""),
           timestamp: new Date(),
         };
       }
@@ -166,7 +179,7 @@ const ChatContainer = () => {
           {activeConversation ? (
             <MessageSection
               conversation={conversations.find(c => c.id === activeConversation)!}
-              onSendMessage={(content) => addMessage(activeConversation, content, 'user')}
+              onSendMessage={(content, attachment) => addMessage(activeConversation, content, 'user', attachment)}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
