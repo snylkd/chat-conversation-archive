@@ -73,15 +73,15 @@ const ConversationsList = ({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className={`p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer group ${
+              className={`p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer group h-[100px] ${
                 activeConversation === conversation.id 
                 ? 'bg-white dark:bg-gray-700' 
                 : 'hover:bg-gray-100 dark:hover:bg-gray-700'
               } transition-colors duration-150`}
               onClick={() => editingConversation !== conversation.id && onSelect(conversation.id)}
             >
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
+              <div className="flex justify-between items-start h-full">
+                <div className="flex-1 flex flex-col h-full justify-between overflow-hidden">
                   {editingConversation === conversation.id ? (
                     <div className="flex items-center gap-2">
                       <input
@@ -131,9 +131,12 @@ const ConversationsList = ({
                       </motion.button>
                     </h3>
                   )}
-                  <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate mt-1">
+                  <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">
                     {conversation.lastMessage}
                   </p>
+                  <div className="text-xs text-gray-400 dark:text-gray-500">
+                    {new Date(conversation.timestamp).toLocaleString()}
+                  </div>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -146,9 +149,6 @@ const ConversationsList = ({
                 >
                   <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </motion.button>
-              </div>
-              <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                {new Date(conversation.timestamp).toLocaleString()}
               </div>
             </motion.div>
           ))}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import ConversationsList from './ConversationsList';
 import MessageSection from './MessageSection';
@@ -86,6 +87,17 @@ const ChatContainer = () => {
     }
   }, [isDarkMode]);
 
+  // Helper function to extract a title from user message
+  const extractTitleFromMessage = (content: string): string => {
+    if (!content) return "Nouvelle conversation";
+    
+    // Take the first 30 characters or the first sentence, whichever is shorter
+    const firstSentence = content.split(/[.!?]/)[0].trim();
+    const shortTitle = content.length > 30 ? content.substring(0, 30) + "..." : content;
+    
+    return firstSentence.length < shortTitle.length ? firstSentence : shortTitle;
+  };
+
   const createNewConversation = () => {
     const newConversation: Conversation = {
       id: Math.random().toString(36).substring(7),
@@ -131,6 +143,12 @@ const ChatContainer = () => {
           attachment
         };
         
+        // Generate title from first user message if it's the first message
+        let updatedTitle = conv.title;
+        if (type === 'user' && conv.messages.length === 0 && content) {
+          updatedTitle = extractTitleFromMessage(content);
+        }
+        
         // Simulate AI response
         if (type === 'user') {
           setTimeout(() => {
@@ -148,6 +166,7 @@ const ChatContainer = () => {
         
         return {
           ...conv,
+          title: updatedTitle,
           messages: [...conv.messages, newMessage],
           lastMessage: content || (attachment ? `Fichier: ${attachment.name}` : ""),
           timestamp: new Date(),
