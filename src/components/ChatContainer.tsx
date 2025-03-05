@@ -3,7 +3,6 @@ import ConversationsList from './ConversationsList';
 import MessageSection from './MessageSection';
 import { PlusCircle, Moon, Sun, Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface FileAttachment {
@@ -36,7 +35,6 @@ const ChatContainer = () => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const isMobile = useIsMobile();
-  const { toast } = useToast();
 
   // Automatically close sidebar on mobile when conversation selected
   useEffect(() => {
@@ -98,10 +96,7 @@ const ChatContainer = () => {
     };
     setConversations([newConversation, ...conversations]);
     setActiveConversation(newConversation.id);
-    toast({
-      title: "Nouvelle conversation créée",
-      description: "Commencez à discuter maintenant!",
-    });
+    // Toast notification removed
   };
 
   const deleteConversation = (id: string) => {
@@ -109,11 +104,7 @@ const ChatContainer = () => {
     if (activeConversation === id) {
       setActiveConversation(null);
     }
-    toast({
-      title: "Conversation supprimée",
-      description: "La conversation a été supprimée avec succès.",
-      variant: "destructive",
-    });
+    // Toast notification removed
   };
 
   const updateConversationTitle = (id: string, newTitle: string) => {
@@ -126,10 +117,7 @@ const ChatContainer = () => {
       }
       return conv;
     }));
-    toast({
-      title: "Titre mis à jour",
-      description: "Le titre de la conversation a été modifié.",
-    });
+    // Toast notification removed
   };
 
   const addMessage = (conversationId: string, content: string, type: 'user' | 'assistant', attachment?: FileAttachment) => {

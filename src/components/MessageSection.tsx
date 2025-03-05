@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Download, Paperclip, X, File } from 'lucide-react';
@@ -70,11 +69,6 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast({
-          title: "Fichier trop volumineux",
-          description: "Le fichier ne doit pas dépasser 5MB.",
-          variant: "destructive",
-        });
         return;
       }
 
@@ -88,10 +82,6 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
       };
       
       setFileAttachment(newFileAttachment);
-      toast({
-        title: "Fichier prêt à envoyer",
-        description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)`,
-      });
     }
   };
 
