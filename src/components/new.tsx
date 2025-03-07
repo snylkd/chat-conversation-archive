@@ -1,45 +1,64 @@
-const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const addMessage = async (conversationId: string, content: string, type: 'user' | 'assistant', attachment?: FileAttachment) => {
+  setConversations(conversations.map(conv => {
+    if (conv.id === conversationId) {
+      const newMessage: Message = {
+        id: Math.random().toString(36).substring(7),
+        content,
+        type,
+        timestamp: new Date(),
+        attachment
+      };
 
-    if (message.trim() || fileAttachment) {
-      // Envoi du message de l'utilisateur via onSendMessage
-      onSendMessage(message.trim(), fileAttachment || undefined);
-
-      // Création de FormData pour envoyer le message et le fichier
-      const formData = new FormData();
-      formData.append('message', message.trim());
-    
-      if (fileAttachment) {
-        formData.append('file', fileAttachment); // Assure-toi que 'fileAttachment' est un objet 'File'
+      let updatedTitle = conv.title;
+      if (type === 'user' && conv.messages.length === 0 && content) {
+        updatedTitle = extractTitleFromMessage(content);
       }
 
-      try {
-        const response = await fetch('https://api.example.com/sendMessage', {
-          method: 'POST',
-          body: formData,
-        });
+      const updatedMessages = [...conv.messages, newMessage];
+      
+      if (type === 'user') {
+        // Envoi de la requête à l'API
+        setTimeout(async () => {
+          const responseContent = attachment
+            ? `J'ai bien reçu votre fichier: "${attachment.name}"`
+            : `Réponse automatique à: "${content}"`;
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Réponse de l\'API:', data);
+          // Ajouter la réponse de l'API
+          try {
+            const formData = new FormData();
+            formData.append('message', content);
 
-          // Envoie la réponse de l'API à la conversation
-          onSendMessage(data.reply || 'Réponse vide de l\'API', fileAttachment || undefined);
-        } else {
-          const errorData = await response.json();
-          console.error('Erreur lors de l\'appel à l\'API:', errorData);
-        }
-      } catch (error) {
-        console.error('Erreur de réseau ou autre', error);
+            if (attachment) {
+              formData.append('file', attachment);
+            }
+
+            const response = await fetch('https://api.example.com/sendMessage', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+
+              // Ajouter la réponse de l'API à la conversation
+              addMessage(conversationId, data.reply || 'Réponse vide de l\'API', 'assistant');
+            } else {
+              console.error('Erreur lors de l\'appel à l\'API');
+            }
+          } catch (error) {
+            console.error('Erreur lors de l\'appel réseau', error);
+          }
+        }, 1000); // Attendre 1 seconde avant la réponse de l'IA
       }
 
-      // Réinitialisation de l'état après l'envoi
-      setMessage('');
-      setFileAttachment(null);
-      setIsTyping(true);
-
-      setTimeout(() => {
-        setIsTyping(false);
-      }, 1000);
+      return {
+        ...conv,
+        title: updatedTitle,
+        messages: updatedMessages,
+        lastMessage: content || (attachment ? `Fichier: ${attachment.name}` : ""),
+        timestamp: new Date(),
+      };
     }
-  };
+    return conv;
+  }));
+};
