@@ -142,17 +142,14 @@ const ChatContainer = () => {
         timestamp: new Date(),
         attachment
       };
-      
-      // Générer le titre de la conversation en fonction du premier message de l'utilisateur
+
       let updatedTitle = conv.title;
       if (type === 'user' && conv.messages.length === 0 && content) {
         updatedTitle = extractTitleFromMessage(content);
       }
 
-      // Ne pas effacer le message utilisateur immédiatement
       const updatedMessages = [...conv.messages, newMessage];
       
-      // Ajouter la réponse de l'assistant après un délai
       if (type === 'user') {
         setTimeout(() => {
           const responseContent = attachment
@@ -160,13 +157,13 @@ const ChatContainer = () => {
             : `Réponse automatique à: "${content}"`;
           
           addMessage(conversationId, responseContent, 'assistant');
-        }, 1000);
+        }, 1000); // Attendre 1 seconde avant la réponse de l'IA
       }
 
       return {
         ...conv,
         title: updatedTitle,
-        messages: updatedMessages,  // Ajouter le message sans supprimer immédiatement
+        messages: updatedMessages,
         lastMessage: content || (attachment ? `Fichier: ${attachment.name}` : ""),
         timestamp: new Date(),
       };
@@ -174,6 +171,7 @@ const ChatContainer = () => {
     return conv;
   }));
 };
+
 
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
