@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import type { Conversation, FileAttachment } from './ChatContainer';
@@ -39,13 +38,15 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
     if (message.trim() || fileAttachment) {
       onSendMessage(message.trim(), fileAttachment || undefined);
       
-      // We don't clear the message input field here anymore
+      // We don't clear the message input field 
       setFileAttachment(null);
       setIsTyping(true);
       
       // Simuler un indicateur de "tape..." pendant 1 seconde
       setTimeout(() => {
         setIsTyping(false);
+        // Removing this line to keep the message in the input field
+        // setMessage('');
       }, 1000);
     }
   };
