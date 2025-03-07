@@ -7,7 +7,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Création d'un objet FormData pour envoyer le message et le fichier
     const formData = new FormData();
     formData.append("message", message.trim());
-    if (fileAttachment) {
+    
+    // Vérifie si fileAttachment est un fichier avant de l'ajouter
+    if (fileAttachment && fileAttachment instanceof File) {
       formData.append("file", fileAttachment);
     }
 
