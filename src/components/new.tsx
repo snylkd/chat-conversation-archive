@@ -1,3 +1,11 @@
+
+const formData = new FormData();
+formData.append('message', message);
+if (fileAttachment) {
+  formData.append('attachment', fileAttachment);
+}
+
+
 const handleSubmit = async (e) => {
   e.preventDefault();
 
