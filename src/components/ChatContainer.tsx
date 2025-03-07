@@ -133,48 +133,47 @@ const ChatContainer = () => {
   };
 
   const addMessage = (conversationId: string, content: string, type: 'user' | 'assistant', attachment?: FileAttachment) => {
-    setConversations(conversations.map(conv => {
-      if (conv.id === conversationId) {
-        const newMessage: Message = {
-          id: Math.random().toString(36).substring(7),
-          content,
-          type,
-          timestamp: new Date(),
-          attachment
-        };
-        
-        // Generate title from first user message if it's the first message
-        let updatedTitle = conv.title;
-        if (type === 'user' && conv.messages.length === 0 && content) {
-          updatedTitle = extractTitleFromMessage(content);
-        }
-        
-        // Simulate AI response
-        if (type === 'user') {
-          setTimeout(() => {
-            const responseContent = attachment 
-              ? `J'ai bien reçu votre fichier: "${attachment.name}"`
-              : `Réponse automatique à: "${content}"`;
-            
-            addMessage(
-              conversationId, 
-              responseContent, 
-              'assistant'
-            );
-          }, 1000);
-        }
-        
-        return {
-          ...conv,
-          title: updatedTitle,
-          messages: [...conv.messages, newMessage],
-          lastMessage: content || (attachment ? `Fichier: ${attachment.name}` : ""),
-          timestamp: new Date(),
-        };
+  setConversations(conversations.map(conv => {
+    if (conv.id === conversationId) {
+      const newMessage: Message = {
+        id: Math.random().toString(36).substring(7),
+        content,
+        type,
+        timestamp: new Date(),
+        attachment
+      };
+      
+      // Générer le titre de la conversation en fonction du premier message de l'utilisateur
+      let updatedTitle = conv.title;
+      if (type === 'user' && conv.messages.length === 0 && content) {
+        updatedTitle = extractTitleFromMessage(content);
       }
-      return conv;
-    }));
-  };
+
+      // Ne pas effacer le message utilisateur immédiatement
+      const updatedMessages = [...conv.messages, newMessage];
+      
+      // Ajouter la réponse de l'assistant après un délai
+      if (type === 'user') {
+        setTimeout(() => {
+          const responseContent = attachment
+            ? `J'ai bien reçu votre fichier: "${attachment.name}"`
+            : `Réponse automatique à: "${content}"`;
+          
+          addMessage(conversationId, responseContent, 'assistant');
+        }, 1000);
+      }
+
+      return {
+        ...conv,
+        title: updatedTitle,
+        messages: updatedMessages,  // Ajouter le message sans supprimer immédiatement
+        lastMessage: content || (attachment ? `Fichier: ${attachment.name}` : ""),
+        timestamp: new Date(),
+      };
+    }
+    return conv;
+  }));
+};
 
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
