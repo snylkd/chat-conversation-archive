@@ -33,13 +33,10 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
     if (message.trim() || fileAttachment) {
       onSendMessage(message.trim(), fileAttachment || undefined);
       
-      // Ne pas effacer immédiatement le message ici
+      // Removed the line that clears the message input
       setFileAttachment(null);
       setIsTyping(true);
       
-      // Réinitialise le textarea uniquement lorsque l'IA répond
-      setMessage(''); // Effacer après l'envoi du message utilisateur et la réponse de l'IA
-  
       // Simuler un indicateur de "tape..." pendant 1 seconde
       setTimeout(() => {
         setIsTyping(false);

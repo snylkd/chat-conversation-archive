@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import ConversationsList from './ConversationsList';
 import MessageSection from './MessageSection';
