@@ -1,49 +1,44 @@
-
-const formData = new FormData();
-formData.append('message', message);
-if (fileAttachment) {
-  formData.append('attachment', fileAttachment);
-}
-
-
-const handleSubmit = async (e) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  // Créez un objet FormData pour envoyer les données
-  const formData = new FormData();
-  formData.append('message', message);
-  if (fileAttachment) {
-    formData.append('attachment', fileAttachment);
-  }
+  if (message.trim() || fileAttachment) {
+    setIsTyping(true);
 
-  try {
-    // Remplacez 'YOUR_API_URL' par l'URL de votre API
-    const response = await fetch('YOUR_API_URL', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Erreur lors de l\'envoi du message');
+    // Création d'un objet FormData pour envoyer le message et le fichier
+    const formData = new FormData();
+    formData.append("message", message.trim());
+    if (fileAttachment) {
+      formData.append("file", fileAttachment);
     }
 
-    const data = await response.json();
+    try {
+      // Envoi de la requête à l'API (exemple d'URL de l'API)
+      const response = await fetch('https://ton-api.com/messages', {
+        method: 'POST',
+        body: formData, // On envoie les données sous forme de FormData
+      });
 
-    // Traitez la réponse de l'API ici
-    // Par exemple, ajoutez la réponse du bot à la conversation
-    setConversation((prevConversation) => ({
-      ...prevConversation,
-      messages: [
-        ...prevConversation.messages,
-        { id: Date.now(), type: 'bot', content: data.reply },
-      ],
-    }));
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'envoi du message');
+      }
 
-    // Réinitialisez le champ de message et le fichier joint
-    setMessage('');
-    setFileAttachment(null);
-  } catch (error) {
-    console.error('Erreur:', error);
-    // Gérez les erreurs ici, par exemple en affichant un message d'erreur à l'utilisateur
+      const data = await response.json();
+
+      // Traitement de la réponse de l'API (exemple: affichage d'un message retourné)
+      console.log('Réponse de l\'API:', data);
+
+      // Remise à zéro des champs après la réponse
+      setMessage('');
+      setFileAttachment(null);
+
+      // Optionnel: Simuler un indicateur de "tape..." pendant 1 seconde
+      setTimeout(() => {
+        setIsTyping(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Erreur lors de la soumission:', error);
+      // Optionnel: Gérer les erreurs d'API ou d'envoi
+      setIsTyping(false);
+    }
   }
 };
