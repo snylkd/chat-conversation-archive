@@ -41,8 +41,8 @@ const addMessage = async (conversationId: string, content: string, type: 'user' 
               const data = await response.json();
               console.log("Réponse de l'API:", data); // Log de la réponse pour comprendre sa structure
 
-              // Vérifie que la clé 'reply' ou 'message' existe et ajoute le message
-              const reply = data.reply || data.message || 'Réponse vide de l\'API';
+              // Utilise la clé 'response' pour récupérer le message
+              const reply = data.response || 'Réponse vide de l\'API';
               console.log("Réponse sélectionnée:", reply); // Log de la réponse sélectionnée avant l'ajout
 
               // Ajouter la réponse de l'API à la conversation
