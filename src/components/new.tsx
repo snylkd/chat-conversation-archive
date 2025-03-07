@@ -17,7 +17,7 @@ const addMessage = async (conversationId: string, content: string, type: 'user' 
       const updatedMessages = [...conv.messages, newMessage];
       
       if (type === 'user') {
-        // Envoi de la requête à l'API
+        // Envoi de la requête à l'API après l'ajout du message utilisateur
         setTimeout(async () => {
           const responseContent = attachment
             ? `J'ai bien reçu votre fichier: "${attachment.name}"`
@@ -39,14 +39,21 @@ const addMessage = async (conversationId: string, content: string, type: 'user' 
 
             if (response.ok) {
               const data = await response.json();
+              console.log("Réponse de l'API:", data); // Log de la réponse pour comprendre sa structure
+
+              // Vérifie que la clé 'reply' ou 'message' existe et ajoute le message
+              const reply = data.reply || data.message || 'Réponse vide de l\'API';
+              console.log("Réponse sélectionnée:", reply); // Log de la réponse sélectionnée avant l'ajout
 
               // Ajouter la réponse de l'API à la conversation
-              addMessage(conversationId, data.reply || 'Réponse vide de l\'API', 'assistant');
+              addMessage(conversationId, reply, 'assistant');
             } else {
               console.error('Erreur lors de l\'appel à l\'API');
+              addMessage(conversationId, 'Erreur lors de l\'appel à l\'API', 'assistant');
             }
           } catch (error) {
             console.error('Erreur lors de l\'appel réseau', error);
+            addMessage(conversationId, 'Erreur lors de la connexion à l\'API', 'assistant');
           }
         }, 1000); // Attendre 1 seconde avant la réponse de l'IA
       }
