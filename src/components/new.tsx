@@ -1,42 +1,41 @@
-const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // Vérifie si le message n'est pas vide
-  if (message.trim()) {
-    // Crée un objet FormData pour envoyer les données
-    const formData = new FormData();
-    formData.append('message', message.trim());
+  // Créez un objet FormData pour envoyer les données
+  const formData = new FormData();
+  formData.append('message', message);
+  if (fileAttachment) {
+    formData.append('attachment', fileAttachment);
+  }
 
-    // N'ajoute le fichier que s'il est présent
-    if (fileAttachment) {
-      formData.append('attachment', fileAttachment);
+  try {
+    // Remplacez 'YOUR_API_URL' par l'URL de votre API
+    const response = await fetch('YOUR_API_URL', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de l\'envoi du message');
     }
 
-    try {
-      // Envoie la requête POST avec les données
-      const response = await fetch('http://localhost:3001/api/message', {
-        method: 'POST',
-        body: formData,
-      });
+    const data = await response.json();
 
-      // Vérifie si la réponse est correcte
-      if (response.ok) {
-        // Réinitialise le champ message et le fichier joint après l'envoi
-        setMessage('');
-        setFileAttachment(null);
-        // Gère la réponse du serveur si nécessaire
-        const data = await response.json();
-        console.log('Message envoyé avec succès:', data);
-      } else {
-        // Gère les erreurs de réponse
-        console.error('Erreur lors de l\'envoi du message:', response.statusText);
-      }
-    } catch (error) {
-      // Gère les erreurs de réseau ou autres
-      console.error('Erreur de réseau ou autre:', error);
-    }
-  } else {
-    // Si le message est vide, affiche une alerte ou un message d'erreur
-    alert('Veuillez entrer un message.');
+    // Traitez la réponse de l'API ici
+    // Par exemple, ajoutez la réponse du bot à la conversation
+    setConversation((prevConversation) => ({
+      ...prevConversation,
+      messages: [
+        ...prevConversation.messages,
+        { id: Date.now(), type: 'bot', content: data.reply },
+      ],
+    }));
+
+    // Réinitialisez le champ de message et le fichier joint
+    setMessage('');
+    setFileAttachment(null);
+  } catch (error) {
+    console.error('Erreur:', error);
+    // Gérez les erreurs ici, par exemple en affichant un message d'erreur à l'utilisateur
   }
 };
