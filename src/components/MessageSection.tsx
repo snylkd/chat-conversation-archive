@@ -32,15 +32,15 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
     e.preventDefault();
     if (message.trim() || fileAttachment) {
       onSendMessage(message.trim(), fileAttachment || undefined);
-      setMessage('');
+      
+      // Ne pas effacer immédiatement le message ici
       setFileAttachment(null);
       setIsTyping(true);
-      // Reset textarea height
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
       
-      // Simulate typing indicator for 1 second
+      // Réinitialise le textarea uniquement lorsque l'IA répond
+      setMessage(''); // Effacer après l'envoi du message utilisateur et la réponse de l'IA
+  
+      // Simuler un indicateur de "tape..." pendant 1 seconde
       setTimeout(() => {
         setIsTyping(false);
       }, 1000);
