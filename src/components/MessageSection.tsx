@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Download, Paperclip, X, File } from 'lucide-react';
@@ -33,7 +34,7 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
     if (message.trim() || fileAttachment) {
       onSendMessage(message.trim(), fileAttachment || undefined);
       
-      // Removed the line that clears the message input
+      // We don't clear the message input field here anymore
       setFileAttachment(null);
       setIsTyping(true);
       
