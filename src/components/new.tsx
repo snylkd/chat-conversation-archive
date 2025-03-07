@@ -1,21 +1,25 @@
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
+  // Vérifie que le message n'est pas vide avant de soumettre
+  if (message.trim() === '') {
+    console.error('Le message ne peut pas être vide');
+    return;
+  }
+
   if (message.trim() || fileAttachment) {
-    // Log des données envoyées pour déboguer
-    console.log('Message:', message.trim());
-    console.log('Fichier joint:', fileAttachment);
+    // FormData pour envoyer un message et un fichier
+    const formData = new FormData();
+    formData.append('message', message.trim());
+    
+    if (fileAttachment) {
+      formData.append('file', fileAttachment); // Assure-toi que 'fileAttachment' est un objet 'File'
+    }
 
     try {
-      const formData = new FormData();
-      formData.append('message', message.trim());
-      if (fileAttachment) {
-        formData.append('file', fileAttachment);
-      }
-
       const response = await fetch('https://api.example.com/sendMessage', {
         method: 'POST',
-        body: formData, // Ici, on envoie un FormData au lieu d'un JSON
+        body: formData,
       });
 
       if (response.ok) {
@@ -29,7 +33,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       console.error('Erreur de réseau ou autre', error);
     }
 
-    // Clear input après envoi
+    // Réinitialisation de l'état après l'envoi
     setMessage('');
     setFileAttachment(null);
     setIsTyping(true);
