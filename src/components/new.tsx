@@ -1,14 +1,8 @@
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  // Vérifie que le message n'est pas vide avant de soumettre
-  if (message.trim() === '') {
-    console.error('Le message ne peut pas être vide');
-    return;
-  }
-
   if (message.trim() || fileAttachment) {
-    // FormData pour envoyer un message et un fichier
+    // Création de FormData pour envoyer le message et le fichier
     const formData = new FormData();
     formData.append('message', message.trim());
     
@@ -23,7 +17,11 @@ const handleSubmit = async (e: React.FormEvent) => {
       });
 
       if (response.ok) {
+        // Log de la réponse de l'API
         const data = await response.json();
+        console.log('Réponse de l\'API:', data);  // Log de la réponse reçue
+
+        // Vérification si la réponse contient un champ "reply"
         onSendMessage(data.reply || 'Réponse vide de l\'API', fileAttachment || undefined);
       } else {
         const errorData = await response.json();
