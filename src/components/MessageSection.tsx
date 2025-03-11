@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import type { Conversation, FileAttachment } from './ChatContainer';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Import the new components
 import Message from './message/Message';
@@ -121,16 +122,18 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
         onExport={exportConversation} 
       />
 
-      <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
-        <AnimatePresence>
-          {conversation.messages.map((msg) => (
-            <Message key={msg.id} message={msg} isMobile={isMobile} />
-          ))}
-          
-          {isTyping && <TypingIndicator />}
-        </AnimatePresence>
-        <div ref={messagesEndRef} />
-      </div>
+      <ScrollArea className="flex-1 p-3 md:p-4">
+        <div className="space-y-3 md:space-y-4">
+          <AnimatePresence>
+            {conversation.messages.map((msg) => (
+              <Message key={msg.id} message={msg} isMobile={isMobile} />
+            ))}
+            
+            {isTyping && <TypingIndicator />}
+          </AnimatePresence>
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
 
       {fileAttachment && (
         <FileAttachmentDisplay 
