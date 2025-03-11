@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, MessageSquarePlus, Edit2, Check, X } from 'lucide-react';
-import type { Conversation } from './ChatContainer';
+import type { Conversation } from '../types/chat';
 
 interface ConversationsListProps {
   conversations: Conversation[];

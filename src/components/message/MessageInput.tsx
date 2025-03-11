@@ -1,8 +1,7 @@
-
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Paperclip } from 'lucide-react';
-import type { FileAttachment } from '../ChatContainer';
+import type { FileAttachment } from '../../types/chat';
 
 interface MessageInputProps {
   message: string;
