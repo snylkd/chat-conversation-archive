@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import type { Conversation, FileAttachment } from './ChatContainer';
@@ -72,7 +73,32 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check if file is a .docx file
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      
+      if (fileExtension !== 'docx') {
+        toast({
+          title: "Type de fichier non supporté",
+          description: "Seuls les fichiers .docx sont acceptés",
+          variant: "destructive",
+        });
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+      
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "Fichier trop volumineux",
+          description: "La taille maximale autorisée est de 5 Mo",
+          variant: "destructive",
+        });
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
         return;
       }
 
@@ -86,6 +112,11 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
       };
       
       setFileAttachment(newFileAttachment);
+      
+      toast({
+        title: "Fichier ajouté",
+        description: `${file.name} a été ajouté à votre message`,
+      });
     }
   };
 
@@ -93,6 +124,10 @@ const MessageSection = ({ conversation, onSendMessage }: MessageSectionProps) =>
     if (fileAttachment) {
       URL.revokeObjectURL(fileAttachment.url);
       setFileAttachment(null);
+      toast({
+        title: "Fichier supprimé",
+        description: "Le fichier a été retiré de votre message",
+      });
     }
   };
 

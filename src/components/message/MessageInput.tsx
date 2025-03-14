@@ -45,7 +45,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           ref={fileInputRef}
           onChange={onFileChange}
           className="hidden"
-          accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx"
+          accept=".docx"
         />
         
         <motion.button
@@ -54,7 +54,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           type="button"
           onClick={onFileClick}
           className="p-2 md:p-3 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-          title="Joindre un fichier"
+          title="Joindre un fichier DOCX"
         >
           <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
         </motion.button>
