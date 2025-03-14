@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import ConversationsList from './ConversationsList';
 import MessageSection from './MessageSection';
 import { PlusCircle, Moon, Sun, Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { toast } from "@/hooks/use-toast";
 
 export interface FileAttachment {
   id: string;
@@ -66,9 +68,22 @@ const ChatContainer = () => {
           });
         });
         setConversations(parsedConversations);
+        
+        // Set the active conversation to the most recent one if available
+        if (parsedConversations.length > 0) {
+          setActiveConversation(parsedConversations[0].id);
+        } else {
+          // If no conversations are found, create a new one automatically
+          createNewConversation();
+        }
       } catch (e) {
         console.error("Failed to parse saved conversations:", e);
+        // If there's an error parsing, create a new conversation
+        createNewConversation();
       }
+    } else {
+      // If no conversations in localStorage, create a new one automatically
+      createNewConversation();
     }
   }, []);
 
@@ -88,7 +103,7 @@ const ChatContainer = () => {
 
   // Helper function to extract a title from user message
   const extractTitleFromMessage = (content: string): string => {
-    if (!content) return "Nouvelle conversation";
+    if (!content) return "Conversation avec l'assistant";
     
     // Take the first 30 characters or the first sentence, whichever is shorter
     const firstSentence = content.split(/[.!?]/)[0].trim();
@@ -100,22 +115,37 @@ const ChatContainer = () => {
   const createNewConversation = () => {
     const newConversation: Conversation = {
       id: Math.random().toString(36).substring(7),
-      title: `Conversation ${conversations.length + 1}`,
-      messages: [],
-      lastMessage: "Nouvelle conversation",
+      title: "Conversation avec l'assistant",
+      messages: [
+        {
+          id: Math.random().toString(36).substring(7),
+          content: "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
+          type: 'assistant',
+          timestamp: new Date(),
+        }
+      ],
+      lastMessage: "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
       timestamp: new Date(),
     };
-    setConversations([newConversation, ...conversations]);
+    setConversations(prevConversations => [newConversation, ...prevConversations]);
     setActiveConversation(newConversation.id);
-    // Toast notification removed
   };
 
   const deleteConversation = (id: string) => {
     setConversations(conversations.filter(conv => conv.id !== id));
     if (activeConversation === id) {
       setActiveConversation(null);
+      // If we just deleted the active conversation, create a new one if there are no more
+      if (conversations.length <= 1) {
+        createNewConversation();
+      } else {
+        // Set the next available conversation as active
+        const nextConv = conversations.find(conv => conv.id !== id);
+        if (nextConv) {
+          setActiveConversation(nextConv.id);
+        }
+      }
     }
-    // Toast notification removed
   };
 
   const updateConversationTitle = (id: string, newTitle: string) => {
@@ -128,49 +158,47 @@ const ChatContainer = () => {
       }
       return conv;
     }));
-    // Toast notification removed
   };
 
   const addMessage = (conversationId: string, content: string, type: 'user' | 'assistant', attachment?: FileAttachment) => {
-  setConversations(conversations.map(conv => {
-    if (conv.id === conversationId) {
-      const newMessage: Message = {
-        id: Math.random().toString(36).substring(7),
-        content,
-        type,
-        timestamp: new Date(),
-        attachment
-      };
+    setConversations(conversations.map(conv => {
+      if (conv.id === conversationId) {
+        const newMessage: Message = {
+          id: Math.random().toString(36).substring(7),
+          content,
+          type,
+          timestamp: new Date(),
+          attachment
+        };
 
-      let updatedTitle = conv.title;
-      if (type === 'user' && conv.messages.length === 0 && content) {
-        updatedTitle = extractTitleFromMessage(content);
+        let updatedTitle = conv.title;
+        if (type === 'user' && conv.messages.length === 1 && content) {
+          updatedTitle = extractTitleFromMessage(content);
+        }
+
+        const updatedMessages = [...conv.messages, newMessage];
+        
+        if (type === 'user') {
+          setTimeout(() => {
+            const responseContent = attachment
+              ? `J'ai bien reçu votre fichier: "${attachment.name}"`
+              : `Réponse automatique à: "${content}"`;
+            
+            addMessage(conversationId, responseContent, 'assistant');
+          }, 1000); // Attendre 1 seconde avant la réponse de l'IA
+        }
+
+        return {
+          ...conv,
+          title: updatedTitle,
+          messages: updatedMessages,
+          lastMessage: content || (attachment ? `Fichier: ${attachment.name}` : ""),
+          timestamp: new Date(),
+        };
       }
-
-      const updatedMessages = [...conv.messages, newMessage];
-      
-      if (type === 'user') {
-        setTimeout(() => {
-          const responseContent = attachment
-            ? `J'ai bien reçu votre fichier: "${attachment.name}"`
-            : `Réponse automatique à: "${content}"`;
-          
-          addMessage(conversationId, responseContent, 'assistant');
-        }, 1000); // Attendre 1 seconde avant la réponse de l'IA
-      }
-
-      return {
-        ...conv,
-        title: updatedTitle,
-        messages: updatedMessages,
-        lastMessage: content || (attachment ? `Fichier: ${attachment.name}` : ""),
-        timestamp: new Date(),
-      };
-    }
-    return conv;
-  }));
-};
-
+      return conv;
+    }));
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
@@ -230,15 +258,15 @@ const ChatContainer = () => {
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200 px-6">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={createNewConversation}
-                className="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center"
               >
-                <PlusCircle className="w-12 h-12 md:w-16 md:h-16 mb-4" />
-                <span className="text-base md:text-lg font-medium text-center">Démarrer une nouvelle conversation</span>
-              </motion.button>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  Création d'une nouvelle conversation...
+                </p>
+              </motion.div>
             </div>
           )}
         </div>
