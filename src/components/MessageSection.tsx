@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import type { Conversation, FileAttachment } from '../types/chat';
+import type { Conversation, FileAttachment } from './ChatContainer';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from "@/components/ui/scroll-area";

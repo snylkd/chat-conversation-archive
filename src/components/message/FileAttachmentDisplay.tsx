@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { File, X } from 'lucide-react';
-import type { FileAttachment } from '../../types/chat';
+import type { FileAttachment } from '../ChatContainer';
 
 interface FileAttachmentDisplayProps {
   fileAttachment: FileAttachment;
