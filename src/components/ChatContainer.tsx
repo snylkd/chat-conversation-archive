@@ -20,6 +20,15 @@ const ChatContainer = () => {
     addMessage
   } = useConversations();
 
+  // Créer automatiquement une conversation au démarrage si aucune n'existe
+  useEffect(() => {
+    if (conversations.length === 0) {
+      createNewConversation();
+    } else if (!activeConversation) {
+      setActiveConversation(conversations[0].id);
+    }
+  }, [conversations, activeConversation, createNewConversation, setActiveConversation]);
+
   // Automatically close sidebar on mobile when conversation selected
   useEffect(() => {
     if (isMobile && activeConversation) {
