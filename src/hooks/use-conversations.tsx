@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Conversation, Message, FileAttachment } from '../types/chat';
 import { extractTitleFromMessage, createNewConversationObject } from '../utils/conversationUtils';
@@ -35,30 +36,6 @@ export function useConversations() {
     const newConversation = createNewConversationObject(conversations.length + 1);
     setConversations([newConversation, ...conversations]);
     setActiveConversation(newConversation.id);
-    
-    // Add welcome message
-    setTimeout(() => {
-      const welcomeMessage: Message = {
-        id: Math.random().toString(36).substring(7),
-        content: "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
-        type: 'assistant',
-        timestamp: new Date()
-      };
-      
-      setConversations(prevConversations => 
-        prevConversations.map(conv => {
-          if (conv.id === newConversation.id) {
-            return {
-              ...conv,
-              messages: [welcomeMessage],
-              lastMessage: welcomeMessage.content,
-              timestamp: new Date()
-            };
-          }
-          return conv;
-        })
-      );
-    }, 500);
   };
 
   const deleteConversation = (id: string) => {

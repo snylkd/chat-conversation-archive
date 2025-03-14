@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, MessageSquarePlus, Edit2, Check, X } from 'lucide-react';
@@ -50,7 +49,7 @@ const ConversationsList = ({
           className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg py-2 md:py-3 px-3 md:px-4 hover:bg-primary/90 transition-colors text-sm md:text-base"
         >
           <MessageSquarePlus className="w-4 h-4 md:w-5 md:h-5" />
-          <span>Nouveau chat</span>
+          <span>Nouvelle conversation</span>
         </motion.button>
       </div>
       
@@ -63,7 +62,7 @@ const ConversationsList = ({
               exit={{ opacity: 0 }}
               className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm"
             >
-              Commencez un nouveau chat!
+              Aucune conversation. Créez-en une nouvelle!
             </motion.div>
           )}
           
