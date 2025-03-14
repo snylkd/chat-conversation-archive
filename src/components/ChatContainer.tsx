@@ -182,7 +182,7 @@ const ChatContainer = () => {
     }));
   };
 
-  return (
+ return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -227,5 +227,6 @@ const ChatContainer = () => {
     </motion.div>
   );
 };
+
 
 export default ChatContainer;
