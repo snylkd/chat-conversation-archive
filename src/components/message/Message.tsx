@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { File } from 'lucide-react';
-import type { Message as MessageType } from '../ChatContainer';
+import type { Message as MessageType } from '../../types/chat';
 
 interface MessageProps {
   message: MessageType;
