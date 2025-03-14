@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import ConversationsList from './ConversationsList';
 import MessageSection from './MessageSection';
-import { PlusCircle, Moon, Sun, Menu, X } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from "@/hooks/use-toast";
@@ -35,24 +34,7 @@ const ChatContainer = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const isMobile = useIsMobile();
-
-  // Automatically close sidebar on mobile when conversation selected
-  useEffect(() => {
-    if (isMobile && activeConversation) {
-      setSidebarOpen(false);
-    }
-  }, [activeConversation, isMobile]);
-
-  // Close sidebar by default on mobile
-  useEffect(() => {
-    if (isMobile) {
-      setSidebarOpen(false);
-    } else {
-      setSidebarOpen(true);
-    }
-  }, [isMobile]);
 
   // Load conversations from localStorage on component mount
   useEffect(() => {
@@ -200,10 +182,6 @@ const ChatContainer = () => {
     }));
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(prev => !prev);
-  };
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -211,46 +189,21 @@ const ChatContainer = () => {
       className="flex h-screen bg-gray-50 dark:bg-gray-900 p-2 md:p-4 transition-colors duration-200 overflow-hidden"
     >
       <div className="flex w-full max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden relative">
-        {/* Mobile menu button */}
-        <button 
-          onClick={toggleSidebar}
-          className="absolute top-4 left-4 z-20 p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 md:hidden"
-          aria-label="Toggle conversations"
+        {/* Dark mode toggle */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+          aria-label="Toggle theme"
         >
-          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-
-        {/* Sidebar with conditional classes for mobile */}
-        <div 
-          className={`${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } absolute md:relative inset-y-0 left-0 z-10 md:translate-x-0 transition-transform duration-300 ease-in-out w-full max-w-[85vw] md:max-w-[280px] md:w-80`}
-        >
-          <ConversationsList
-            conversations={conversations}
-            activeConversation={activeConversation}
-            onSelect={setActiveConversation}
-            onDelete={deleteConversation}
-            onCreate={createNewConversation}
-            onUpdateTitle={updateConversationTitle}
-          />
-        </div>
-
-        {/* Main content with adjusted padding for mobile menu */}
-        <div className="flex-1 flex flex-col relative">
-          {/* Dark mode toggle with repositioning for mobile */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-            aria-label="Toggle theme"
-          >
-            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </motion.button>
-          
+          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </motion.button>
+        
+        {/* Main chat content taking full width */}
+        <div className="flex-1 flex flex-col">
           {activeConversation ? (
-            <div className={`flex-1 flex ${!sidebarOpen ? 'md:pl-0' : 'md:pl-0'}`}>
+            <div className="flex-1 flex">
               <MessageSection
                 conversation={conversations.find(c => c.id === activeConversation)!}
                 onSendMessage={(content, attachment) => addMessage(activeConversation, content, 'user', attachment)}
